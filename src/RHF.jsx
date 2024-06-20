@@ -8,7 +8,12 @@ export default function RHF() {
   //   { value: "Lastname" },
   //   { value: "Email" },
   // ];
-  const { register, handleSubmit, reset } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
   const [koders, setKoders] = useState([]);
 
   function OnSubmited(data) {
@@ -60,23 +65,45 @@ export default function RHF() {
           })}
         />
         <input
-          type="text"
+          type="email"
           placeholder="Email"
           className="rounded p-2 flex-1 text-black"
           {...register("Email", {
             required: { value: true, message: "Email requerido" },
             minLength: {
               value: 3,
-              message: "Email, requiere minimo 3 caracteres",
+              message: "Email, minimo 3 caracteres",
             },
             maxLength: { value: 20, message: "Email, maximo 50 caracteres" },
+            pattern: {
+              value: /[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/,
+              message: "Ingresa un email valido",
+            },
           })}
         />
+
+        {/* Manejo de errores/cada input */}
+        {errors.Name && (
+          <p className=" flex justify-center text-red-500 w-full font-bold text-md">
+            {errors.Name?.message}
+          </p>
+        )}
+        {errors.Lastname && (
+          <p className=" flex justify-center text-red-500 w-full font-bold text-md">
+            {errors.Lastname?.message}
+          </p>
+        )}
+        {errors.Email && (
+          <p className=" flex justify-center text-red-500 w-full font-bold text-md">
+            {errors.Email?.message}
+          </p>
+        )}
 
         <button className=" bg-blue-900 w-full mt-3 p-3 rounded-md">
           Agregar
         </button>
       </form>
+
       {/*  Encabezado de la lista */}
       {/* lista de koders ** Componente a Renderizar** */}
 
