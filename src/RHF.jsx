@@ -1,39 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-
-// import Input from "./Components/Input";
+import { getkoders, createKoder, deleteKoder } from "./api";
+import { Toaster, toast } from "sonner";
 export default function RHF() {
-  // const valuesInput = [
-  //   { value: "Name" },
-  //   { value: "Lastname" },
-  //   { value: "Email" },
-  // ];
+  //Recibe 2 cosas: funcion anonima, arreglo de dependencias
+  //se utiliza para ejecutar codigo en el ciclo de vida de una coponente (renderiza(se monta), running(idl), cambio de estado o props y regresa al 1, se desmonta o se elimina)
+  // se ejecuta en 2 momentos
+  //1. cuando el componente se renderiza por primera vez
+  //2. cuando alguna de sus dependencias cambia
+
+  //un mismo compoonete puede tener varios useEfect
+  useEffect(() => {
+    getkoders()
+      .then((koders) => {
+        setKoders(koders);
+      })
+      .catch((error) => {
+        console.error("Error al obtener koders: ", error);
+        alert("Error al obtener koders");
+      });
+  }, []); // el arreglo se queda vacio para decir que solo queremos que se ejecute 1 vex al renderizar
   const {
     register,
     handleSubmit,
     reset,
+    setFocus,
     formState: { errors, isValid, isSubmitted },
   } = useForm();
   const [koders, setKoders] = useState([]);
 
-  function OnSubmited(data) {
-    // Creamos copia de koders y agregamos la nueva data(objeto)
-    const newKoders = [...koders, data];
-    // Actualizamos koders con nuestro nuevo array
-    setKoders(newKoders);
-    console.log("newKoders: ", newKoders);
-    reset();
+  async function OnSubmited(data) {
+    try {
+      await createKoder({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+      });
+
+      const kodersList = await getkoders();
+      setKoders(kodersList);
+      setFocus("firstName");
+      reset();
+      toast.success("koder creado!");
+    } catch (error) {
+      console.error("Error al crear Koder: ", error);
+      alert("Error al crear Koder");
+    }
   }
 
-  function removekoder(index) {
-    console.log("index: ", index);
-    //remover con filter
-    const arrKoderRemoved = koders.filter((koder, idx) => idx !== index);
-    setKoders(arrKoderRemoved);
+  function onDelete(koderId) {
+    deleteKoder(koderId)
+      .then(() => {
+        toast.success("koder Eliminado!");
+        getkoders()
+          .then((koders) => {
+            setKoders(koders);
+          })
+          .catch((error) => {
+            console.error("error al traer lista koders: ", error);
+            alert("Error al obtener koders");
+          });
+      })
+      .catch((error) => {
+        console.error("Error al borrar un koder: ", error);
+        alert("Error al eliminar un koder");
+      });
   }
 
   return (
     <main className="w-full max-h-screen ">
+      <Toaster position="top-right" richColors />
       <form
         onSubmit={handleSubmit(OnSubmited)}
         className="text-white flex flex-wrap gap-2 max-w-screen-md m-auto p-4 justify-between"
@@ -42,7 +78,7 @@ export default function RHF() {
           type="text"
           placeholder="Name"
           className="rounded p-2 flex-1 text-black"
-          {...register("Name", {
+          {...register("firstName", {
             required: { value: true, message: "Name requerido" },
             minLength: {
               value: 3,
@@ -53,9 +89,9 @@ export default function RHF() {
         />
         <input
           type="text"
-          placeholder="Lastname"
+          placeholder="lastName"
           className="rounded p-2 flex-1 text-black"
-          {...register("Lastname", {
+          {...register("lastName", {
             required: { value: true, message: "Lastname requerido" },
             minLength: {
               value: 3,
@@ -66,9 +102,9 @@ export default function RHF() {
         />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="email"
           className="rounded p-2 flex-1 text-black disabled:border-2 disabled:border-red-700 disabled:bg-red-400"
-          {...register("Email", {
+          {...register("email", {
             required: { value: true, message: "Email requerido" },
             minLength: {
               value: 3,
@@ -83,19 +119,19 @@ export default function RHF() {
         />
 
         {/* Manejo de errores/cada input */}
-        {errors.Name && (
+        {errors.firstName && (
           <p className=" flex justify-center text-red-500 w-full font-bold text-md">
-            {errors.Name?.message}
+            {errors.firstName?.message}
           </p>
         )}
-        {errors.Lastname && (
+        {errors.lastName && (
           <p className=" flex justify-center text-red-500 w-full font-bold text-md">
-            {errors.Lastname?.message}
+            {errors.lastName?.message}
           </p>
         )}
-        {errors.Email && (
+        {errors.email && (
           <p className=" flex justify-center text-red-500 w-full font-bold text-md">
-            {errors.Email?.message}
+            {errors.email?.message}
           </p>
         )}
 
@@ -134,13 +170,16 @@ export default function RHF() {
                     key={`key-${idx}`}
                     className="flex text-black font-semibold gap-4 w-full  justify-between p-4  border-t-[#B8336A] border-t-4"
                   >
-                    <span>{koder.Name}</span>
+                    {/* <span>{koder.Name}</span>
                     <span>{koder.Lastname}</span>
-                    <span>{koder.Email}</span>
+                    <span>{koder.Email}</span> */}
+                    <span>{koder.firstName}</span>
+                    <span>{koder.lastName}</span>
+                    <span>{koder.email}</span>
                     <span
                       className="p-1 bg-[#70263294] rounded hover:bg-[#702632f1] cursor-pointer"
                       onClick={() => {
-                        removekoder(idx);
+                        onDelete(koder.id);
                       }}
                     >
                       ❌
