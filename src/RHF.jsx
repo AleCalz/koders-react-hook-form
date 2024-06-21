@@ -12,7 +12,7 @@ export default function RHF() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitted },
   } = useForm();
   const [koders, setKoders] = useState([]);
 
@@ -67,7 +67,7 @@ export default function RHF() {
         <input
           type="email"
           placeholder="Email"
-          className="rounded p-2 flex-1 text-black"
+          className="rounded p-2 flex-1 text-black disabled:border-2 disabled:border-red-700 disabled:bg-red-400"
           {...register("Email", {
             required: { value: true, message: "Email requerido" },
             minLength: {
@@ -99,14 +99,16 @@ export default function RHF() {
           </p>
         )}
 
-        <button className=" bg-blue-900 w-full mt-3 p-3 rounded-md">
+        <button
+          className=" bg-[#5F5FBF] w-full mt-3 p-3 rounded-md disabled:bg-[#5f5fbf80] disabled:cursor-not-allowed disabled:text-gray-400"
+          // isSubmited: true after the form is submitted.
+          // isValid: true if the form doesn't have any errors.
+          // si submit es true(ya se envio), evalua si es valido los inputs
+          disabled={isSubmitted ? !isValid : false}
+        >
           Agregar
         </button>
       </form>
-
-      {/*  Encabezado de la lista */}
-      {/* lista de koders ** Componente a Renderizar** */}
-
       <section>
         {/* si no hay datos */}
         {koders.length === 0 && (
@@ -117,25 +119,26 @@ export default function RHF() {
         {/* si hay datos */}
         {koders.length > 0 && (
           <div>
+            {/* Encabezado de la lista */}
             <div className="flex max-w-screen-sm m-auto p-2 mt-5  justify-between text-white font-bold">
               <span>Name</span>
               <span>Lastname</span>
               <span>Email</span>
-              <span className=" bg-red-300 rounded-md">❌</span>
+              <span className=" bg-gray-800 rounded-md px-4">❌</span>
             </div>
-            <div className=" flex flex-col max-w-screen-sm m-auto w-full rounded-b-2xl bg-orange-300">
+            {/* lista de koders ** a Renderizar */}
+            <div className=" flex flex-col max-w-screen-sm m-auto w-full rounded-b-2xl bg-[#C490D1]">
               {koders.map((koder, idx) => {
                 return (
                   <div
                     key={`key-${idx}`}
-                    className="flex text-black font-semibold gap-4 w-full  justify-between p-4  border-t-yellow-600 border-t-4"
+                    className="flex text-black font-semibold gap-4 w-full  justify-between p-4  border-t-[#B8336A] border-t-4"
                   >
-                    <span>{idx}</span>
                     <span>{koder.Name}</span>
                     <span>{koder.Lastname}</span>
                     <span>{koder.Email}</span>
                     <span
-                      className="p-1 bg-red-400 rounded hover:border-2 border-red-800 cursor-pointer"
+                      className="p-1 bg-[#70263294] rounded hover:bg-[#702632f1] cursor-pointer"
                       onClick={() => {
                         removekoder(idx);
                       }}
