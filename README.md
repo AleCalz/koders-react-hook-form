@@ -15,7 +15,7 @@ Puedes ver la aplicación en funcionamiento en: [koders-react-hook-form.vercel.a
 
 1. Clona el repositorio:
    ```sh
-   git clone <URL del repositorio>
+   git clone https://github.com/AleCalz/koders-react-hook-form
    ```
 2. Navega al directorio del proyecto:
    ```sh
